@@ -78,29 +78,9 @@ jobs:
         working-directory: tests
         run: go mod tidy
 
-      - name: Install JUnit Tool
-        run: |
-          go install github.com/jstemmer/go-junit-report@latest
-          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-
-      - name: Run Terratest + Generate Report
+      - name: Run Terratest
         working-directory: tests
-        run: |
-          go test -v ./... 2>&1 | go-junit-report > report.xml
-
-      - name: Debug Report
-        working-directory: tests
-        run: |
-          ls -l
-          cat report.xml
-
-      - name: Publish Test Report
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: Terratest Results
-          path: tests/report.xml
-          reporter: java-junit
+        run: go test -v -timeout 30m
 
 
   # -------------------------------
@@ -129,10 +109,10 @@ jobs:
       - name: Select Workspace
         id: workspace
         run: |
-          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
             WS="learning"
           else
-            WS="dev-learning"
+            WS="learning"
           fi
           echo "workspace=$WS" >> $GITHUB_OUTPUT
           terraform workspace select -or-create $WS
@@ -182,13 +162,10 @@ jobs:
 
       - name: Select Workspace
         run: |
-          terraform workspace select -or-create learning
+          terraform workspace select learning || terraform workspace new learning
 
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
-
-      - name: Debug Workspace
-        run: terraform workspace show
 
 
   # -------------------------------
@@ -201,7 +178,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
 
     environment:
-      name: learning
+      name: nagarro-promotion
 
     steps:
       - name: Checkout
@@ -216,7 +193,7 @@ jobs:
         run: terraform init
 
       - name: Select Workspace
-        run: terraform workspace select -or-create learning
+        run: terraform workspace select learning
 
       - name: Terraform Destroy
         run: terraform destroy -auto-approve \
