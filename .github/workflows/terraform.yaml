@@ -112,7 +112,7 @@ jobs:
           if [ "${{ github.ref }}" == "refs/heads/main" ]; then
             WS="learning"
           else
-            WS="dev-learning"
+            WS="learning"
           fi
           echo "workspace=$WS" >> $GITHUB_OUTPUT
           terraform workspace select $WS || terraform workspace new $WS
