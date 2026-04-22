@@ -129,6 +129,22 @@ jobs:
           name: tfplan
           path: tfplan
 
+      - name: Install JUnit Tool
+        run: go install github.com/jstemmer/go-junit-report@latest
+
+      - name: Run Terratest + Generate Report
+        working-directory: tests
+        run: |
+          go test -v ./... 2>&1 | go-junit-report > report.xml
+
+      - name: Publish Test Report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Terratest Results
+          path: tests/report.xml
+          reporter: java-junit
+
 
   # -------------------------------
   # 4. MANUAL APPROVAL + APPLY
