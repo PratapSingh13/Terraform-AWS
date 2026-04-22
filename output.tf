@@ -9,6 +9,10 @@ output "vpc_cidr" {
   value       = module.vpc.vpc_cidr_block
 }
 
+output "tags" {
+  value = module.vpc.tags
+}
+
 # Subnets
 output "public_subnet_ids" {
   description = "List of public subnet IDs"

@@ -1,3 +1,8 @@
+output "tags" {
+  description = "The tags applied to the VPC"
+  value       = aws_vpc.vpc.tags
+}
+
 output "vpc_id" {
   description = "The ID of the VPC"
   value       = aws_vpc.vpc.id
