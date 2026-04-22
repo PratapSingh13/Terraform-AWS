@@ -115,7 +115,7 @@ jobs:
             WS="learning"
           fi
           echo "workspace=$WS" >> $GITHUB_OUTPUT
-          terraform workspace select $WS || terraform workspace new $WS
+          terraform workspace select -or-create $WS
 
       - name: Terraform Plan
         run: |
