@@ -4,7 +4,7 @@ output "vpc_id" {
   value       = module.vpc.vpc_id
 }
 
-output "vpc_cidr_block" {
+output "vpc_cidr" {
   description = "The primary CIDR block of the VPC"
   value       = module.vpc.vpc_cidr_block
 }
