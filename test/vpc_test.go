@@ -14,7 +14,7 @@ func TestVPCModule(t *testing.T) {
 		TerraformDir: "../", // root where your main.tf exists
 
 		VarFiles: []string{
-			"environment/nagarro-promotion/terraform.tfvars",
+			"environment/learning/terraform.tfvars",
 		},
 	}
 
