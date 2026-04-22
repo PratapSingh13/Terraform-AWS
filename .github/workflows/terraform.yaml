@@ -129,10 +129,10 @@ jobs:
       - name: Select Workspace
         id: workspace
         run: |
-          if [ "${{ github.ref }}" == "refs/heads/main" ]; then
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             WS="learning"
           else
-            WS="learning"
+            WS="dev-learning"
           fi
           echo "workspace=$WS" >> $GITHUB_OUTPUT
           terraform workspace select -or-create $WS
@@ -182,10 +182,13 @@ jobs:
 
       - name: Select Workspace
         run: |
-          terraform workspace select learning || terraform workspace new learning
+          terraform workspace select -or-create learning
 
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
+
+      - name: Debug Workspace
+        run: terraform workspace show
 
 
   # -------------------------------
@@ -198,7 +201,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
 
     environment:
-      name: nagarro-promotion
+      name: learning
 
     steps:
       - name: Checkout
@@ -213,7 +216,7 @@ jobs:
         run: terraform init
 
       - name: Select Workspace
-        run: terraform workspace select learning
+        run: terraform workspace select -or-create learning
 
       - name: Terraform Destroy
         run: terraform destroy -auto-approve \
