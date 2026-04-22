@@ -78,9 +78,29 @@ jobs:
         working-directory: tests
         run: go mod tidy
 
-      - name: Run Terratest
+      - name: Install JUnit Tool
+        run: |
+          go install github.com/jstemmer/go-junit-report@latest
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
+      - name: Run Terratest + Generate Report
         working-directory: tests
-        run: go test -v -timeout 30m
+        run: |
+          go test -v ./... 2>&1 | go-junit-report > report.xml
+
+      - name: Debug Report
+        working-directory: tests
+        run: |
+          ls -l
+          cat report.xml
+
+      - name: Publish Test Report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Terratest Results
+          path: tests/report.xml
+          reporter: java-junit
 
 
   # -------------------------------
@@ -128,22 +148,6 @@ jobs:
         with:
           name: tfplan
           path: tfplan
-
-      - name: Install JUnit Tool
-        run: go install github.com/jstemmer/go-junit-report@latest
-
-      - name: Run Terratest + Generate Report
-        working-directory: tests
-        run: |
-          go test -v ./... 2>&1 | go-junit-report > report.xml
-
-      - name: Publish Test Report
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: Terratest Results
-          path: tests/report.xml
-          reporter: java-junit
 
 
   # -------------------------------
