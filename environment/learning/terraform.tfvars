@@ -88,3 +88,58 @@ users = {
     pgp_key        = null
   }
 }
+
+# ################################################################################
+# IAM Policies
+# ################################################################################
+policies = {
+
+  s3_read_only = {
+    description = "S3 read only access"
+    policy = {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect = "Allow"
+          Action = [
+            "s3:GetObject",
+            "s3:ListBucket"
+          ]
+          Resource = "*"
+        }
+      ]
+    }
+  }
+
+  ec2_read_only = {
+    description = "EC2 describe access"
+    policy = {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect   = "Allow"
+          Action   = ["ec2:Describe*"]
+          Resource = "*"
+        }
+      ]
+    }
+  }
+
+  cross_service_policy = {
+    description = "Multi-service access"
+    policy = {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect = "Allow"
+          Action = [
+            "s3:GetObject",
+            "ec2:DescribeInstances",
+            "logs:CreateLogGroup"
+          ]
+          Resource = "*"
+        }
+      ]
+    }
+  }
+}

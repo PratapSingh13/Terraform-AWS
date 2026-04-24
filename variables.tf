@@ -125,3 +125,18 @@ variable "users" {
     tags            = optional(map(string), {})
   }))
 }
+
+# ################################################################################
+# IAM Policies
+# ################################################################################
+variable "policies" {
+  description = "IAM policies configuration"
+
+  type = map(object({
+    name        = optional(string)
+    description = string
+    policy      = any
+    path        = optional(string)
+    tags        = optional(map(string))
+  }))
+}

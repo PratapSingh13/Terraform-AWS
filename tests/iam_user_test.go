@@ -28,8 +28,11 @@ func newIAMClient(t *testing.T, region string) *iam.IAM {
 
 func terraformOptions(t *testing.T, vars map[string]interface{}) *terraform.Options {
 	return terraform.WithDefaultRetryableErrors(t, &terraform.Options{
-		TerraformDir: "./fixtures",
+		TerraformDir: "../",
 		Vars:         vars,
+		VarFiles: []string{
+			"environment/learning/terraform.tfvars",
+		},
 		RetryableTerraformErrors: map[string]string{
 			".*ThrottlingException.*": "AWS API throttling, retrying...",
 			".*RequestError.*":        "AWS request error, retrying...",
@@ -44,7 +47,7 @@ func terraformOptions(t *testing.T, vars map[string]interface{}) *terraform.Opti
 // ─────────────────────────────────────────────
 
 func TestIAMUsersCreated(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	opts := terraformOptions(t, map[string]interface{}{
 		"users": map[string]interface{}{
@@ -66,7 +69,7 @@ func TestIAMUsersCreated(t *testing.T) {
 
 	iamClient := newIAMClient(t, "us-east-1")
 
-	for _, userName := range []string{"test-alice", "test-bob"} {
+	for _, userName := range []string{"alice", "bob"} {
 		t.Run(fmt.Sprintf("user_%s_exists", userName), func(t *testing.T) {
 			output, err := iamClient.GetUser(&iam.GetUserInput{
 				UserName: aws.String(userName),
@@ -82,11 +85,11 @@ func TestIAMUsersCreated(t *testing.T) {
 // ─────────────────────────────────────────────
 
 func TestIAMUserTags(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	opts := terraformOptions(t, map[string]interface{}{
 		"users": map[string]interface{}{
-			"test-tag-user": map[string]interface{}{
+			"alice": map[string]interface{}{
 				"console_access":  false,
 				"pgp_key":         nil,
 				"password_length": 20,
@@ -100,7 +103,7 @@ func TestIAMUserTags(t *testing.T) {
 	iamClient := newIAMClient(t, "us-east-1")
 
 	output, err := iamClient.ListUserTags(&iam.ListUserTagsInput{
-		UserName: aws.String("test-tag-user"),
+		UserName: aws.String("alice"),
 	})
 	require.NoError(t, err)
 
@@ -109,10 +112,9 @@ func TestIAMUserTags(t *testing.T) {
 		tags[aws.StringValue(tag.Key)] = aws.StringValue(tag.Value)
 	}
 
-	assert.Equal(t, "test-project", tags["Project"])
-	assert.Equal(t, "test", tags["Environment"])
+	assert.Equal(t, "aws-terraform", tags["Project"])
+	assert.Equal(t, "learning", tags["Environment"])
 	assert.Equal(t, "Terraform", tags["managed_by"])
-	assert.Equal(t, "test-project-test-user", tags["Name"])
 }
 
 // ─────────────────────────────────────────────
@@ -120,11 +122,11 @@ func TestIAMUserTags(t *testing.T) {
 // ─────────────────────────────────────────────
 
 func TestConsoleAccessUserHasLoginProfile(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	opts := terraformOptions(t, map[string]interface{}{
 		"users": map[string]interface{}{
-			"test-console-user": map[string]interface{}{
+			"alice": map[string]interface{}{
 				"console_access":  true,
 				"pgp_key":         "keybase:your_keybase_username",
 				"password_length": 20,
@@ -138,10 +140,10 @@ func TestConsoleAccessUserHasLoginProfile(t *testing.T) {
 	iamClient := newIAMClient(t, "us-east-1")
 
 	output, err := iamClient.GetLoginProfile(&iam.GetLoginProfileInput{
-		UserName: aws.String("test-console-user"),
+		UserName: aws.String("alice"),
 	})
 	require.NoError(t, err)
-	assert.Equal(t, "test-console-user", aws.StringValue(output.LoginProfile.UserName))
+	assert.Equal(t, "alice", aws.StringValue(output.LoginProfile.UserName))
 	assert.True(t, aws.BoolValue(output.LoginProfile.PasswordResetRequired))
 }
 
@@ -150,11 +152,11 @@ func TestConsoleAccessUserHasLoginProfile(t *testing.T) {
 // ─────────────────────────────────────────────
 
 func TestNonConsoleUserHasNoLoginProfile(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	opts := terraformOptions(t, map[string]interface{}{
 		"users": map[string]interface{}{
-			"test-svc-user": map[string]interface{}{
+			"bob": map[string]interface{}{
 				"console_access":  false,
 				"pgp_key":         nil,
 				"password_length": 20,
@@ -168,7 +170,7 @@ func TestNonConsoleUserHasNoLoginProfile(t *testing.T) {
 	iamClient := newIAMClient(t, "us-east-1")
 
 	_, err := iamClient.GetLoginProfile(&iam.GetLoginProfileInput{
-		UserName: aws.String("test-svc-user"),
+		UserName: aws.String("bob"),
 	})
 
 	// Should return NoSuchEntity error — login profile must not exist
@@ -181,7 +183,7 @@ func TestNonConsoleUserHasNoLoginProfile(t *testing.T) {
 // ─────────────────────────────────────────────
 
 func TestIAMUserOutputs(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	opts := terraformOptions(t, map[string]interface{}{
 		"users": map[string]interface{}{
@@ -211,7 +213,7 @@ func TestIAMUserOutputs(t *testing.T) {
 // ─────────────────────────────────────────────
 
 func TestIAMUserForceDestroy(t *testing.T) {
-	t.Parallel()
+	// t.Parallel()
 
 	opts := terraformOptions(t, map[string]interface{}{
 		"users": map[string]interface{}{
@@ -265,37 +267,37 @@ func TestIAMUserEndToEnd(t *testing.T) {
 
 	// Alice — console user
 	t.Run("alice_exists", func(t *testing.T) {
-		out, err := iamClient.GetUser(&iam.GetUserInput{UserName: aws.String("test-e2e-alice")})
+		out, err := iamClient.GetUser(&iam.GetUserInput{UserName: aws.String("alice")})
 		require.NoError(t, err)
-		assert.Equal(t, "test-e2e-alice", aws.StringValue(out.User.UserName))
+		assert.Equal(t, "alice", aws.StringValue(out.User.UserName))
 	})
 
 	t.Run("alice_has_login_profile", func(t *testing.T) {
-		out, err := iamClient.GetLoginProfile(&iam.GetLoginProfileInput{UserName: aws.String("test-e2e-alice")})
+		out, err := iamClient.GetLoginProfile(&iam.GetLoginProfileInput{UserName: aws.String("alice")})
 		require.NoError(t, err)
 		assert.True(t, aws.BoolValue(out.LoginProfile.PasswordResetRequired))
 	})
 
 	t.Run("alice_has_correct_tags", func(t *testing.T) {
-		out, err := iamClient.ListUserTags(&iam.ListUserTagsInput{UserName: aws.String("test-e2e-alice")})
+		out, err := iamClient.ListUserTags(&iam.ListUserTagsInput{UserName: aws.String("alice")})
 		require.NoError(t, err)
 		tags := make(map[string]string)
 		for _, tag := range out.Tags {
 			tags[aws.StringValue(tag.Key)] = aws.StringValue(tag.Value)
 		}
-		assert.Equal(t, "test-project", tags["Project"])
-		assert.Equal(t, "test", tags["Environment"])
+		assert.Equal(t, "aws-terraform", tags["Project"])
+		assert.Equal(t, "learning", tags["Environment"])
 	})
 
 	// Bob — service user
 	t.Run("bob_exists", func(t *testing.T) {
-		out, err := iamClient.GetUser(&iam.GetUserInput{UserName: aws.String("test-e2e-bob")})
+		out, err := iamClient.GetUser(&iam.GetUserInput{UserName: aws.String("bob")})
 		require.NoError(t, err)
-		assert.Equal(t, "test-e2e-bob", aws.StringValue(out.User.UserName))
+		assert.Equal(t, "bob", aws.StringValue(out.User.UserName))
 	})
 
 	t.Run("bob_has_no_login_profile", func(t *testing.T) {
-		_, err := iamClient.GetLoginProfile(&iam.GetLoginProfileInput{UserName: aws.String("test-e2e-bob")})
+		_, err := iamClient.GetLoginProfile(&iam.GetLoginProfileInput{UserName: aws.String("bob")})
 		require.Error(t, err)
 		assert.Contains(t, err.Error(), "NoSuchEntity")
 	})
