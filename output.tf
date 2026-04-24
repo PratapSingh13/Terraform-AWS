@@ -13,26 +13,26 @@ output "tags" {
   value = module.vpc.tags
 }
 
-# # Subnets
-# output "public_subnet_ids" {
-#   description = "List of public subnet IDs"
-#   value       = module.public_subnet.subnet_ids
-# }
+# Subnets
+output "public_subnet_ids" {
+  description = "List of public subnet IDs"
+  value       = module.public_subnet.subnet_ids
+}
 
-# output "public_subnet_cidrs" {
-#   description = "CIDR blocks of public subnets"
-#   value       = module.public_subnet.subnet_cidr
-# }
+output "public_subnet_cidrs" {
+  description = "CIDR blocks of public subnets"
+  value       = module.public_subnet.subnet_cidr
+}
 
-# output "private_subnet_ids" {
-#   description = "List of private subnet IDs"
-#   value       = module.private_subnet.subnet_ids
-# }
+output "private_subnet_ids" {
+  description = "List of private subnet IDs"
+  value       = module.private_subnet.subnet_ids
+}
 
-# output "private_subnet_cidrs" {
-#   description = "CIDR blocks of private subnets"
-#   value       = module.private_subnet.subnet_cidr
-# }
+output "private_subnet_cidrs" {
+  description = "CIDR blocks of private subnets"
+  value       = module.private_subnet.subnet_cidr
+}
 
 # # Internet Gateway
 # output "igw_id" {

@@ -33,35 +33,35 @@ module "vpc" {
   )
 }
 
-# module "public_subnet" {
-#   source = "./modules/networking/subnet"
+module "public_subnet" {
+  source = "./modules/networking/subnet"
 
-#   vpc_id             = module.vpc.vpc_id
-#   availability_zones = local.availability_zones
-#   subnet_cidr        = var.public_subnets_cidr
-#   subnet_name        = "public-subnet"
-#   tags = merge(
-#     local.common_tags,
-#     local.env_tags
-#   )
+  vpc_id             = module.vpc.vpc_id
+  availability_zones = local.availability_zones
+  subnet_cidr        = var.public_subnets_cidr
+  subnet_name        = "public-subnet"
+  tags = merge(
+    local.common_tags,
+    local.env_tags
+  )
 
-#   depends_on = [module.vpc]
-# }
+  depends_on = [module.vpc]
+}
 
-# module "private_subnet" {
-#   source = "./modules/networking/subnet"
+module "private_subnet" {
+  source = "./modules/networking/subnet"
 
-#   vpc_id             = module.vpc.vpc_id
-#   availability_zones = local.availability_zones
-#   subnet_cidr        = var.private_subnets_cidr
-#   subnet_name        = "private-subnet"
-#   tags = merge(
-#     local.common_tags,
-#     local.env_tags
-#   )
+  vpc_id             = module.vpc.vpc_id
+  availability_zones = local.availability_zones
+  subnet_cidr        = var.private_subnets_cidr
+  subnet_name        = "private-subnet"
+  tags = merge(
+    local.common_tags,
+    local.env_tags
+  )
 
-#   depends_on = [module.vpc]
-# }
+  depends_on = [module.vpc]
+}
 
 # module "igw" {
 #   source = "./modules/networking/igw"
