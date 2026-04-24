@@ -55,13 +55,13 @@ resource "aws_route_table" "public-route-table" {
 aws_route_table_association "public"
 ---------------------------------------------------------------------
 Associates the above route table with each public subnet. The `for_each`
-iterates over `var.public_subnets_cidr` (expected to be a list of
+iterates over `var.public_subnets_ids` (expected to be a list of
 subnet IDs or CIDR strings that map to subnet IDs). Adjust the variable
 type if you prefer to pass explicit subnet IDs.
 */
 
 resource "aws_route_table_association" "public" {
-  for_each       = { for idx, subnet_id in var.public_subnets_cidr : idx => subnet_id }
+  for_each       = { for idx, subnet_id in var.public_subnets_ids : idx => subnet_id }
   subnet_id      = each.value
   route_table_id = aws_route_table.public-route-table.id
 }

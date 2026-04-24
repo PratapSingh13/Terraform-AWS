@@ -16,6 +16,11 @@ variable "owner" {
   type        = string
 }
 
+variable "managed_by" {
+  description = "The entity that manages the utility (Terraform, Ansible, etc.)"
+  type        = string
+}
+
 variable "environment" {
   description = "The environment of the project"
   type        = string
@@ -107,4 +112,16 @@ variable "vpc_peerings" {
   default = {}
 }
 
-
+# ################################################################################
+# IAM Users
+# ################################################################################
+variable "users" {
+  description = "Map of IAM users to create."
+  type = map(object({
+    console_access  = bool
+    pgp_key         = optional(string)
+    password_length = optional(number, 20)
+    password        = optional(string)
+    tags            = optional(map(string), {})
+  }))
+}

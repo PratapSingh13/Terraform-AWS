@@ -10,8 +10,8 @@ variable "nat_gateway_id" {
   default     = ""
 }
 
-variable "private_subnets_cidr" {
-  description = "CIDR blocks for private subnets"
+variable "private_subnets_ids" {
+  description = "IDs for private subnets"
   type        = list(string)
   default     = []
 }

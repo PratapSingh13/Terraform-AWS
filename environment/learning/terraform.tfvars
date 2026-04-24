@@ -3,6 +3,7 @@
 # ################################################################################
 region      = "ap-south-1"
 project     = "aws-terraform"
+managed_by  = "Terraform"
 owner       = "DevOps"
 environment = "learning"
 
@@ -69,5 +70,21 @@ vpc_peerings = {
     destination_vpc_cidr                      = "192.168.0.0/16"
     allow_remote_vpc_dns_resolution_accepter  = false
     allow_remote_vpc_dns_resolution_requester = false
+  }
+}
+
+# ################################################################################
+# IAM Users
+# ################################################################################
+users = {
+  "alice" = {
+    console_access  = true
+    pgp_key         = null # or base64 PGP key
+    password_length = 20
+    password        = "YourSecretPassword123!"
+  }
+  "bob" = {
+    console_access = false
+    pgp_key        = null
   }
 }

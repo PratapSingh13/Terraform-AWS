@@ -10,8 +10,8 @@ variable "igw_id" {
   default     = ""
 }
 
-variable "public_subnets_cidr" {
-  description = "CIDR blocks for public subnets"
+variable "public_subnets_ids" {
+  description = "IDs for public subnets"
   type        = list(string)
   default     = []
 }

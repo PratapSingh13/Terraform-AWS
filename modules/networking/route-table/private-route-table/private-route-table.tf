@@ -64,13 +64,13 @@ resource "aws_route" "peering_private" {
 aws_route_table_association "private"
 ---------------------------------------------------------------------
 Associates the above route table with each private subnet. The `for_each`
-iterates over `var.private_subnets_cidr` (expected to be a list of
+iterates over `var.private_subnets_ids` (expected to be a list of
 subnet IDs or CIDR strings that map to subnet IDs). Adjust the variable
 type if you prefer to pass explicit subnet IDs.
 */
 
 resource "aws_route_table_association" "private" {
-  for_each       = { for idx, subnet_id in var.private_subnets_cidr : idx => subnet_id }
+  for_each       = { for idx, subnet_id in var.private_subnets_ids : idx => subnet_id }
   subnet_id      = each.value
   route_table_id = aws_route_table.private-route-table.id
 }
