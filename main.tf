@@ -23,15 +23,15 @@ locals {
   # ]...)
 }
 
-# module "vpc" {
-#   source = "./modules/networking/vpc"
+module "vpc" {
+  source = "./modules/networking/vpc"
 
-#   vpc_cidr = var.vpc_cidr
-#   tags = merge(
-#     local.common_tags,
-#     local.env_tags
-#   )
-# }
+  vpc_cidr = var.vpc_cidr
+  tags = merge(
+    local.common_tags,
+    local.env_tags
+  )
+}
 
 # module "public_subnet" {
 #   source = "./modules/networking/subnet"

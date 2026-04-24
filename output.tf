@@ -1,17 +1,17 @@
-# # VPC
-# output "vpc_id" {
-#   description = "ID of the VPC"
-#   value       = module.vpc.vpc_id
-# }
+# VPC
+output "vpc_id" {
+  description = "ID of the VPC"
+  value       = module.vpc.vpc_id
+}
 
-# output "vpc_cidr" {
-#   description = "The primary CIDR block of the VPC"
-#   value       = module.vpc.vpc_cidr_block
-# }
+output "vpc_cidr" {
+  description = "The primary CIDR block of the VPC"
+  value       = module.vpc.vpc_cidr_block
+}
 
-# output "tags" {
-#   value = module.vpc.tags
-# }
+output "tags" {
+  value = module.vpc.tags
+}
 
 # # Subnets
 # output "public_subnet_ids" {
