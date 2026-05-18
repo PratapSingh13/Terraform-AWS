@@ -52,45 +52,45 @@ jobs:
         run: terraform validate
 
 
-  # # -------------------------------
-  # # 2. TERRATEST (ADDED)
-  # # -------------------------------
-  # terratest:
-  #   name: Terratest
-  #   runs-on: ubuntu-latest
-  #   needs: terraform-checks
+  # -------------------------------
+  # 2. TERRATEST (ADDED)
+  # -------------------------------
+  terratest:
+    name: Terratest
+    runs-on: ubuntu-latest
+    needs: terraform-checks
 
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  #     - name: Setup Go
-  #       uses: actions/setup-go@v4
-  #       with:
-  #         go-version: 1.21
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.21
 
-  #     - name: Setup Terraform
-  #       uses: hashicorp/setup-terraform@v3
-  #       with:
-  #         terraform_version: ${{ env.TF_VERSION }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
 
-  #     - name: Cache Go Modules
-  #       uses: actions/cache@v4
-  #       with:
-  #         path: |
-  #           ~/.cache/go-build
-  #           ~/go/pkg/mod
-  #         key: ${{ runner.os }}-go-${{ hashFiles('tests/go.sum') }}
-  #         restore-keys: |
-  #           ${{ runner.os }}-go-
+      - name: Cache Go Modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('tests/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
-  #     - name: Init Go Modules
-  #       working-directory: tests
-  #       run: go mod tidy
+      - name: Init Go Modules
+        working-directory: tests
+        run: go mod tidy
 
-  #     - name: Run Terratest
-  #       working-directory: tests
-  #       run: go test -v -timeout 30m
+      - name: Run Terratest
+        working-directory: tests
+        run: go test -v -timeout 30m
 
 
   # -------------------------------
