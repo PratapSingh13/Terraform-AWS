@@ -13,7 +13,7 @@ variable "nacls" {
   description = "Map of NACL configurations"
 
   type = map(object({
-    subnet_ids = optional(list(string), [])
+    subnet_ids  = optional(list(string), [])
     subnet_keys = optional(list(string), [])
 
     ingress = optional(list(object({
