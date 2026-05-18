@@ -91,6 +91,34 @@ variable "security_group_ingress_rules" {
 }
 
 # ################################################################################
+# Network ACL
+# ################################################################################
+
+variable "nacls" {
+  description = "Map of NACL configurations"
+  type = map(object({
+    subnet_ids = optional(list(string), [])
+    ingress = optional(list(object({
+      rule_number = number
+      protocol    = string
+      action      = string
+      cidr_block  = string
+      from_port   = number
+      to_port     = number
+    })), [])
+    egress = optional(list(object({
+      rule_number = number
+      protocol    = string
+      action      = string
+      cidr_block  = string
+      from_port   = number
+      to_port     = number
+    })), [])
+    tags = optional(map(string), {})
+  }))
+}
+
+# ################################################################################
 # Variables for VPC Peering
 # ################################################################################
 variable "enable_vpc_peering" {
@@ -138,5 +166,91 @@ variable "policies" {
     policy      = any
     path        = optional(string)
     tags        = optional(map(string))
+  }))
+}
+
+# ################################################################################
+# IAM Roles
+# ################################################################################
+variable "roles" {
+  description = "IAM roles configuration"
+
+  type = map(object({
+    name                 = optional(string)
+    description          = optional(string)
+    assume_role_policy   = any
+    path                 = optional(string)
+    max_session_duration = optional(number)
+    tags                 = optional(map(string))
+  }))
+}
+
+# ################################################################################
+# Route53
+# ################################################################################
+# ################################################################################
+# Route53
+# ################################################################################
+
+variable "default_vpc_ids" {
+  description = "Fallback VPC IDs if not provided in zones"
+  type        = list(string)
+  default     = []
+}
+
+variable "zones" {
+  type = map(object({
+    name    = string
+    vpc_ids = optional(list(string), [])
+  }))
+}
+
+variable "records" {
+  description = "Route53 DNS records"
+
+  type = map(object({
+    zone_key = string
+    name     = string
+    type     = string
+
+    ttl     = optional(number)
+    records = optional(list(string))
+
+    alias = optional(object({
+      name    = string
+      zone_id = string
+    }))
+
+    set_identifier = optional(string)
+
+    weight   = optional(number)
+    failover = optional(string)
+    region   = optional(string)
+
+    # ✅ GEO
+    geo = optional(object({
+      country   = optional(string)
+      continent = optional(string)
+    }))
+
+    # ✅ GEOPROXIMITY
+    geoproximity = optional(object({
+      aws_region = optional(string)
+      bias       = optional(number)
+      coordinates = optional(object({
+        latitude  = string
+        longitude = string
+      }))
+    }))
+
+    health_check_id = optional(string)
+  }))
+}
+
+variable "health_checks" {
+  type = map(object({
+    fqdn          = string
+    type          = string
+    resource_path = optional(string)
   }))
 }
