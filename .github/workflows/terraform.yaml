@@ -39,7 +39,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
-          role-to-assume: arn:aws:iam::590379872770:role/github-workflows-using-oidc
+          role-to-assume: arn:aws:iam::590379872770:role/TerraformProvisioningPolicy
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Terraform Format
