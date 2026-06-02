@@ -1,0 +1,19 @@
+output "tags" {
+  description = "The tags applied to the VPC"
+  value       = aws_vpc.vpc.tags
+}
+
+output "vpc_id" {
+  description = "The ID of the VPC"
+  value       = aws_vpc.vpc.id
+}
+
+output "vpc_cidr_block" {
+  description = "The CIDR block of the VPC"
+  value       = aws_vpc.vpc.cidr_block
+}
+
+output "vpc_arn" {
+  description = "The ARN of the VPC"
+  value       = aws_vpc.vpc.arn
+}

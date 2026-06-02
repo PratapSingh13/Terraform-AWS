@@ -1,0 +1,375 @@
+# ################################################################################
+# Global
+# ################################################################################
+region      = "ap-south-1"
+project     = "aws-terraform"
+managed_by  = "Terraform"
+owner       = "DevOps"
+environment = "learning"
+
+# ################################################################################
+# VPC
+# ################################################################################
+vpc_cidr = "10.0.0.0/16"
+
+# ################################################################################
+# Public and Private Subnets
+# ################################################################################
+
+public_subnets_cidr  = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"]
+private_subnets_cidr = ["10.0.3.0/24", "10.0.4.0/24", "10.0.5.0/24"]
+
+# ################################################################################
+# Security Group
+# ################################################################################
+create_security_group          = true
+security_group_use_name_prefix = false
+security_group_ingress_rules = {
+  http = {
+    ip_protocol = "tcp"
+    from_port   = 80
+    to_port     = 80
+    cidr_ipv4   = "0.0.0.0/0"
+  }
+  https = {
+    ip_protocol = "tcp"
+    from_port   = 443
+    to_port     = 443
+    cidr_ipv4   = "0.0.0.0/0"
+  }
+}
+
+security_group_egress_rules = {
+  all_outbound = {
+    ip_protocol = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_ipv4   = "0.0.0.0/0"
+  }
+}
+
+# ################################################################################
+# NACL
+# ################################################################################
+nacls = {
+  mixed_nacl = {
+    # 🔹 Direct subnet IDs (manual override)
+    subnet_ids = []
+
+    # 🔹 Logical subnet groups (from subnet_map in main.tf)
+    subnet_keys = ["public", "private"]
+
+    # 🔹 INGRESS RULES
+    ingress = [
+      {
+        rule_number = 100
+        protocol    = "tcp"
+        action      = "allow"
+        cidr_block  = "0.0.0.0/0"
+        from_port   = 80
+        to_port     = 80
+      },
+      {
+        rule_number = 110
+        protocol    = "tcp"
+        action      = "allow"
+        cidr_block  = "0.0.0.0/0"
+        from_port   = 443
+        to_port     = 443
+      },
+      {
+        rule_number = 120
+        protocol    = "tcp"
+        action      = "allow"
+        cidr_block  = "10.0.0.0/16"
+        from_port   = 0
+        to_port     = 65535
+      }
+    ]
+
+    # 🔹 EGRESS RULES
+    egress = [
+      {
+        rule_number = 100
+        protocol    = "-1" # all traffic
+        action      = "allow"
+        cidr_block  = "0.0.0.0/0"
+        from_port   = 0
+        to_port     = 0
+      }
+    ]
+
+    # 🔹 Optional Tags
+    tags = {
+      Name = "mixed-nacl"
+      Type = "hybrid"
+    }
+  }
+}
+
+# ################################################################################
+# VPC Peering
+# ################################################################################
+enable_vpc_peering = true
+
+vpc_peerings = {
+  "peering-1" = {
+    peer_owner_id                             = "590379872770"
+    peer_vpc_id                               = "vpc-09743f2c8b1ab0128"
+    peer_region                               = "ap-south-1"
+    destination_vpc_cidr                      = "172.31.0.0/16"
+    allow_remote_vpc_dns_resolution_accepter  = false
+    allow_remote_vpc_dns_resolution_requester = false
+  }
+
+  "peering-2" = {
+    peer_owner_id                             = "590379872770"
+    peer_vpc_id                               = "vpc-00c60f96b30ca8c0b"
+    peer_region                               = "ap-south-1"
+    destination_vpc_cidr                      = "192.168.0.0/16"
+    allow_remote_vpc_dns_resolution_accepter  = false
+    allow_remote_vpc_dns_resolution_requester = false
+  }
+}
+
+# ################################################################################
+# IAM Users
+# ################################################################################
+users = {
+  "alice" = {
+    console_access  = true
+    pgp_key         = null # or base64 PGP key
+    password_length = 20
+    password        = "YourSecretPassword123!"
+  }
+  "bob" = {
+    console_access = false
+    pgp_key        = null
+  }
+}
+
+# ################################################################################
+# IAM Policies
+# ################################################################################
+policies = {
+
+  s3_read_only = {
+    description = "S3 read only access"
+    policy = {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect = "Allow"
+          Action = [
+            "s3:GetObject",
+            "s3:ListBucket"
+          ]
+          Resource = "*"
+        }
+      ]
+    }
+  }
+
+  ec2_read_only = {
+    description = "EC2 describe access"
+    policy = {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect   = "Allow"
+          Action   = ["ec2:Describe*"]
+          Resource = "*"
+        }
+      ]
+    }
+  }
+
+  cross_service_policy = {
+    description = "Multi-service access"
+    policy = {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect = "Allow"
+          Action = [
+            "s3:GetObject",
+            "ec2:DescribeInstances",
+            "logs:CreateLogGroup"
+          ]
+          Resource = "*"
+        }
+      ]
+    }
+  }
+}
+
+# ################################################################################
+# IAM Roles
+# ################################################################################
+roles = {
+
+  ec2_role = {
+    description = "EC2 role"
+    assume_role_policy = {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect = "Allow"
+          Principal = {
+            Service = "ec2.amazonaws.com"
+          }
+          Action = "sts:AssumeRole"
+        }
+      ]
+    }
+  }
+
+  lambda_role = {
+    description = "Lambda role"
+    assume_role_policy = {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect = "Allow"
+          Principal = {
+            Service = "lambda.amazonaws.com"
+          }
+          Action = "sts:AssumeRole"
+        }
+      ]
+    }
+  }
+
+  cross_account_role = {
+    description = "Cross account role"
+    assume_role_policy = {
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Effect = "Allow"
+          Principal = {
+            AWS = "arn:aws:iam::590379872770:root"
+          }
+          Action = "sts:AssumeRole"
+        }
+      ]
+    }
+  }
+}
+
+# ################################################################################
+# Route53
+# ################################################################################
+health_checks = {
+  app_check = {
+    fqdn          = "app.kaushal.com"
+    type          = "HTTP"
+    resource_path = "/health"
+  }
+}
+
+zones = {
+  public_zone = {
+    name = "kaushal.com"
+  }
+
+  private_zone = {
+    name    = "internal.kaushal.com"
+    vpc_ids = [] # This will be auto-populated with the VPC ID from module.vpc if not provided
+  }
+}
+records = {
+
+  app = {
+    zone_key = "public_zone"
+    name     = "app.kaushal.com"
+    type     = "A"
+    ttl      = 300
+    records  = ["1.2.3.4"]
+  }
+
+  s3 = {
+    zone_key = "public_zone"
+    name     = "s3.kaushal.com"
+    type     = "A"
+
+    alias = {
+      name    = "s3-website-eu-west-1.amazonaws.com"
+      zone_id = "Z1BKCTXD74EZPE"
+    }
+  }
+
+  geo = {
+    zone_key       = "public_zone"
+    name           = "geo.kaushal.com"
+    type           = "CNAME"
+    ttl            = 5
+    records        = ["europe.test.example.com."]
+    set_identifier = "europe"
+
+    geo = {
+      continent = "EU"
+    }
+  }
+
+  geoproximity-aws-region = {
+    zone_key       = "public_zone"
+    name           = "geo-region.kaushal.com"
+    type           = "CNAME"
+    ttl            = 5
+    records        = ["us-east-1.test.example.com."]
+    set_identifier = "us-east-1"
+
+    geoproximity = {
+      aws_region = "us-east-1"
+    }
+  }
+
+  geoproximity-coordinates = {
+    zone_key       = "public_zone"
+    name           = "geo-coord.kaushal.com"
+    type           = "CNAME"
+    ttl            = 5
+    records        = ["nyc.test.example.com."]
+    set_identifier = "nyc"
+
+    geoproximity = {
+      coordinates = {
+        latitude  = "40.71"
+        longitude = "-74.01"
+      }
+    }
+  }
+
+  weighted = {
+    zone_key       = "public_zone"
+    name           = "weighted.kaushal.com"
+    type           = "A"
+    ttl            = 300
+    set_identifier = "blue"
+    weight         = 50
+    records        = ["1.1.1.1"]
+  }
+
+  primary = {
+    zone_key       = "public_zone"
+    name           = "failover.kaushal.com"
+    type           = "A"
+    ttl            = 300
+    set_identifier = "primary"
+    failover       = "PRIMARY"
+    records        = ["2.2.2.2"]
+
+    health_check_id = "app_check"
+  }
+
+  secondary = {
+    zone_key       = "public_zone"
+    name           = "failover.kaushal.com"
+    type           = "A"
+    ttl            = 300
+    set_identifier = "secondary"
+    failover       = "SECONDARY"
+    records        = ["3.3.3.3"]
+  }
+}
