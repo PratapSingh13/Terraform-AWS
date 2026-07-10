@@ -1,0 +1,22 @@
+name: Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Deployment Environment"
+        required: true
+      version:
+        description: "Application Version"
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: |
+          echo "Environment = ${{ github.event.inputs.environment }}"
+          echo "Version = ${{ github.event.inputs.version }}"
